@@ -1,0 +1,155 @@
+<html>
+    <head>
+        <title>WAY Thanksgiving</title>
+        <link rel="stylesheet" href="main.css" type="text/css" />
+        <script type="text/javascript" src="../../Winwheel.js"></script>
+        <script src="http://cdnjs.cloudflare.com/ajax/libs/gsap/latest/TweenMax.min.js"></script>
+    </head>
+    <body>
+        <div align="center">
+            <h1>Reward with random gift - Thanksgiving</h1>
+            <br />
+            <table cellpadding="0" cellspacing="0" border="0">
+                <tr>
+                    <td width="438" height="582" class="the_wheel" align="center" valign="center">
+                        <canvas id="canvas" width="434" height="434">
+                            <p style="color: white" align="center">Sorry, your browser doesn't support canvas. Please try another.</p>
+                        </canvas>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <div class="power_controls">
+                            <img id="spin_button" src="spin_on.png" class="clickable" alt="Spin" onClick="startSpin();" />
+                            <a href="#" onClick="resetWheel(true); return false;">Play Again</a><br />
+                        </div>
+                    </td>
+                </tr>
+            </table>
+        </div>
+        <script>
+            var segments = [
+                {'fillStyle' : '#eae56f', 'text' : 'XIXI'},
+                {'fillStyle' : '#89f26e', 'text' : 'LIU'},
+                {'fillStyle' : '#7de6ef', 'text' : 'WANG YU'},
+                {'fillStyle' : '#e7706f', 'text' : 'SELINA'},
+                {'fillStyle' : '#eae56f', 'text' : 'WANG'},
+                {'fillStyle' : '#89f26e', 'text' : 'ZHANG'},
+                {'fillStyle' : '#7de6ef', 'text' : 'JIANG'},
+                {'fillStyle' : '#e7706f', 'text' : 'ALEX'},
+                {'fillStyle' : '#eae56f', 'text' : 'MIN'},
+                {'fillStyle' : '#e7706f', 'text' : 'KAI'},
+            ];
+            var curSegments;
+
+            // Create new wheel object specifying the parameters at creation time.
+            var theWheel = makeWheel(segments);
+
+            // -----------------------------------------------------------------
+            // This function is called when the segment under the prize pointer changes
+            // we can play a small tick sound here like you would expect on real prizewheels.
+            // -----------------------------------------------------------------
+            var audio = new Audio('tick.mp3');  // Create audio object and load tick.mp3 file.
+
+            function playSound()
+            {
+                // Stop and rewind the sound if it already happens to be playing.
+                audio.pause();
+                audio.currentTime = 0;
+
+                // Play the sound.
+                audio.play();
+            }
+
+            function makeWheel(_segments) {
+                document.getElementById('spin_button').src       = "spin_on.png";
+                document.getElementById('spin_button').className = "clickable";
+                curSegments = _segments;
+
+                return new Winwheel({
+                    'numSegments'  : curSegments.length,     // Specify number of segments.
+                    'outerRadius'  : 212,   // Set outer radius so wheel fits inside the background.
+                    'textFontSize' : 28,    // Set font size as desired.
+                    'segments'     : curSegments,       // Define segments including colour and text.
+                    'animation' :           // Specify the animation to use.
+                    {
+                        'type'     : 'spinToStop',
+                        'duration' : 45,
+                        'spins'    : curSegments.length,
+                        'callbackFinished' : alertPrize,
+                        'callbackSound'    : playSound,   // Function to call when the tick sound is to be triggered.
+                        'soundTrigger'     : 'pin'        // Specify pins are to trigger the sound, the other option is 'segment'.
+                    },
+                    'pins' :
+                    {
+                        'number' : curSegments.length * 2   // Number of pins. They space evenly around the wheel.
+                    }
+                });
+            }
+
+            // -------------------------------------------------------
+            // Called when the spin animation has finished by the callback feature of the wheel because I specified callback in the parameters
+            // note the indicated segment is passed in as a parmeter as 99% of the time you will want to know this to inform the user of their prize.
+            // -------------------------------------------------------
+            function alertPrize(indicatedSegment)
+            {
+
+                // Do basic alert of the segment text.
+                // You would probably want to do something more interesting with this information.
+                if (confirm("Press cancel this turn if it's you, " + indicatedSegment.text + "'s gift")) {
+                    curSegments = curSegments.filter(x => x.text != indicatedSegment.text);
+                    theWheel = makeWheel(curSegments);
+                    resetWheel();
+                } else {
+                    theWheel = makeWheel(curSegments);
+                    resetWheel();
+                }
+            }
+
+            // =======================================================================================================================
+            // Code below for the power controls etc which is entirely optional. You can spin the wheel simply by
+            // calling theWheel.startAnimation();
+            // =======================================================================================================================
+            var wheelPower    = 0;
+            var wheelSpinning = false;
+
+            // -------------------------------------------------------
+            // Click handler for spin button.
+            // -------------------------------------------------------
+            function startSpin()
+            {
+                // Ensure that spinning can't be clicked again while already running.
+                if (wheelSpinning == false)
+                {
+                    theWheel.animation.spins = 20;
+
+                    // Disable the spin button so can't click again while wheel is spinning.
+                    document.getElementById('spin_button').src       = "spin_off.png";
+                    document.getElementById('spin_button').className = "";
+
+                    // Begin the spin animation by calling startAnimation on the wheel object.
+                    theWheel.startAnimation();
+
+                    // Set to true so that power can't be changed and spin button re-enabled during
+                    // the current animation. The user will have to reset before spinning again.
+                    wheelSpinning = false;
+                }
+            }
+
+            // -------------------------------------------------------
+            // Function for reset button.
+            // -------------------------------------------------------
+            function resetWheel(isRoll)
+            {
+                if (isRoll) {
+                    theWheel = makeWheel(segments);
+                } 
+                theWheel.stopAnimation(false);  // Stop the animation, false as param so does not call callback function.
+                theWheel.rotationAngle = 0;     // Re-set the wheel angle to 0 degrees.
+                theWheel.draw();                // Call draw to render changes to the wheel.
+
+                wheelSpinning = false;          // Reset to false to power buttons and spin can be clicked again.
+            }
+        </script>
+    </body>
+</html>
