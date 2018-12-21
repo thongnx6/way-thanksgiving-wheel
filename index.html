@@ -2,8 +2,8 @@
     <head>
         <title>WAY Thanksgiving</title>
         <link rel="stylesheet" href="main.css" type="text/css" />
-        <script type="text/javascript" src="../../Winwheel.js"></script>
-        <script src="http://cdnjs.cloudflare.com/ajax/libs/gsap/latest/TweenMax.min.js"></script>
+        <script type="text/javascript" src="./Winwheel.js"></script>
+        <script src="./TweenMax.min.js"></script>
     </head>
     <body>
         <div align="center">
@@ -21,6 +21,7 @@
                     <td>
                         <div class="power_controls">
                             <img id="spin_button" src="spin_on.png" class="clickable" alt="Spin" onClick="startSpin();" />
+                            <br/>
                             <a href="#" onClick="resetWheel(true); return false;">Play Again</a><br />
                         </div>
                     </td>
@@ -28,6 +29,9 @@
             </table>
         </div>
         <script>
+
+            var startOpen = new Audio('startOpen.mp3');  // Create audio object and load tick.mp3 file.
+
             var segments = [
                 {'fillStyle' : '#eae56f', 'text' : 'XIXI'},
                 {'fillStyle' : '#89f26e', 'text' : 'LIU'},
@@ -49,7 +53,9 @@
             // This function is called when the segment under the prize pointer changes
             // we can play a small tick sound here like you would expect on real prizewheels.
             // -----------------------------------------------------------------
+
             var audio = new Audio('tick.mp3');  // Create audio object and load tick.mp3 file.
+            var openPrz = new Audio('open.mp3');  // Create audio object and load tick.mp3 file.
 
             function playSound()
             {
@@ -69,12 +75,12 @@
                 return new Winwheel({
                     'numSegments'  : curSegments.length,     // Specify number of segments.
                     'outerRadius'  : 212,   // Set outer radius so wheel fits inside the background.
-                    'textFontSize' : 28,    // Set font size as desired.
+                    'textFontSize' : 24,    // Set font size as desired.
                     'segments'     : curSegments,       // Define segments including colour and text.
                     'animation' :           // Specify the animation to use.
                     {
                         'type'     : 'spinToStop',
-                        'duration' : 45,
+                        'duration' : 25,
                         'spins'    : curSegments.length,
                         'callbackFinished' : alertPrize,
                         'callbackSound'    : playSound,   // Function to call when the tick sound is to be triggered.
@@ -93,7 +99,7 @@
             // -------------------------------------------------------
             function alertPrize(indicatedSegment)
             {
-
+                openPrz.play();
                 // Do basic alert of the segment text.
                 // You would probably want to do something more interesting with this information.
                 if (confirm("Press cancel this turn if it's you, " + indicatedSegment.text + "'s gift")) {
@@ -141,6 +147,7 @@
             // -------------------------------------------------------
             function resetWheel(isRoll)
             {
+                startOpen.play();
                 if (isRoll) {
                     theWheel = makeWheel(segments);
                 } 
